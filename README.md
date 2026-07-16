@@ -13,6 +13,8 @@
 
 A simple game where you are given an action to perform and you are congratulated if you perform it before the time limit ends.
 
+(I experienced an error where sometimes the buttons would automatically be in the pressed down state when the game starts and the game would just loop through itself. It can be fixed by pressing both buttons once which will reset them.)
+
 
 ## How It Works
 
