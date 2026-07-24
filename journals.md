@@ -57,3 +57,27 @@ I fixed the randomization issue. I think it had to do with my inputs being regis
 ## Jul 16, 2026, 1:03 AM
 
 The game is essentially finished I think since it takes the player inputs and gives them a response based on it. It additionally has multiple outputs like the buzzer and led which activate when the player does an action before time is up.
+
+---
+
+## Jul 23, 2026, 11:00 PM
+
+I think I fixed an error I made with the wiring for the buzzer. I intended for it to only buzz for a second, however, I accidentally connected a wire from power directly to it that meant it was buzzing forever. So I removed it and now it works as intended.
+
+---
+
+## Jul 23, 2026, 11:17 PM
+
+I also fixed an issue with an LED where I did a similar thing that I did with the buzzer aka connecting it directly to power instead of digital output. Now I'm working on adding a temperature sensor to the game which will add another type of input the player needs to do by blowing on the sensor/holding it/whatever else they can do to change it's temp in order to win.
+
+---
+
+## Jul 24, 2026, 12:04 AM
+
+For the temperature reader I originally tried LM35 but kept getting nothing from it so now I've switched to the DHT11, but now I'm having a weird issue where it initially prints the correct temperature then afterwards it keeps printing 0.0 or 253.00 depending on which library I'm using. I'm not exactly sure how to resolve it though.
+
+---
+
+## Jul 24, 2026, 12:21 AM
+
+I got the temperature sensor working. It appears that it only activates when there is a change in temperature otherwise it prints out nan. So to check if the player interacts with it I had to make sure that nan isn't detected and that the sensor gets a value.
