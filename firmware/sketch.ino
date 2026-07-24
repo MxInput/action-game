@@ -1,11 +1,12 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <DHT.h>
 
 int currentState;
 
 int secondCurrentState;
 
-int noteDuration = 2;
+int noteDuration = 0.5;
 
 int NOTEC4 = 31;
 
@@ -13,11 +14,14 @@ int micValue;
 
 int action;
 
-int maxActions = 3;
+int maxActions = 4;
 
 LiquidCrystal_I2C lcd(0x27, 16, 2); 
 
 unsigned long lastMillis = 0;
+unsigned long buzzMillis = 0;
+
+bool buzzing = false;
 
 bool gameStarted = false;
 bool completed = false;
@@ -25,6 +29,11 @@ bool generatedAction = false;
 bool failed = false;
 
 float time_limit = 4000;
+float buzz_limit = 1000;
+
+float tempInitial;
+
+DHT dht(2, DHT11);
 
 void setup() {
   Serial.begin(9600);
@@ -34,6 +43,7 @@ void setup() {
   pinMode(10, OUTPUT);
 
   tone(10, NOTEC4, noteDuration);
+  delay(1000);
   noTone(10);
 
   lcd.init();
@@ -42,6 +52,8 @@ void setup() {
   lcd.print("PRESS ANY BUTTON TO BEGIN.");
 
   digitalWrite(8, HIGH);
+
+  dht.begin();
 }
 
 void loop(){
@@ -62,6 +74,17 @@ void loop(){
     lastMillis = currentMillis;
   }
 
+  if (buzzing) {
+    if (currentMillis - buzzMillis >= buzz_limit) {
+      buzzMillis = currentMillis;
+      buzzing = false;
+      noTone(10);
+    }
+  }
+  else {
+    buzzMillis = currentMillis;
+  }
+
   if (!gameStarted) {
     if (currentState == LOW || secondCurrentState == LOW) {
       gameStarted = true;
@@ -70,7 +93,7 @@ void loop(){
   else {
     if (!generatedAction) {
         tone(10, NOTEC4, noteDuration);
-        noTone(10);
+        buzzing = true;
 
       digitalWrite(8, LOW);
 
@@ -91,6 +114,13 @@ void loop(){
       break;
     case 2:
       directions = "Make noise into the mic.";
+      break;
+    case 3:
+      directions = "Cover temp sensor.";
+      tempInitial = dht.readTemperature();
+      if (isnan(tempInitial)) {
+        tempInitial = 12.5;
+      }
       break;
   }
 
@@ -121,13 +151,18 @@ void loop(){
       completed = true;
       }
         break;
+      case 3:
+        if (tempInitial != dht.readTemperature() && !isnan(dht.readTemperature())) {
+      completed = true;
+      }
+        break;
     }
     }
   }
 
   if (completed) {
     tone(10, NOTEC4, noteDuration);
-    noTone(10);
+    buzzing = true;
 
     lcd.clear();
     lcd.print("You are Quick");
@@ -146,7 +181,7 @@ void loop(){
 
   if (failed) {
     tone(10, NOTEC4, noteDuration);
-    noTone(10);
+    buzzing = true;
 
     lcd.clear();
     lcd.print("Took Too Long");
